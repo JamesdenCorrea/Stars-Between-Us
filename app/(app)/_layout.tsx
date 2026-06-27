@@ -15,7 +15,7 @@ export default function AppLayout() {
   }
 
   if (!session) {
-    return <Redirect href="/(auth)/login" />;
+    return <Redirect href="/(auth)/welcome" />;
   }
 
   return (
@@ -30,6 +30,7 @@ export default function AppLayout() {
       }}
     >
       <Stack.Screen name="dashboard" />
+      <Stack.Screen name="happiness-jar" />
     </Stack>
   );
 }
