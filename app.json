@@ -23,10 +23,20 @@
       },
       "package": "com.jamesdencorrea.loveapp"
     },
-    "plugins": ["expo-router", "expo-secure-store"],
     "web": {
       "bundler": "metro",
-      "output": "static"
+      "output": "static",
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9f7b012c-bc08-4504-9e26-e9f943322c85"
+      }
     }
   }
 }
