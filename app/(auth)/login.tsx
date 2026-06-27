@@ -77,8 +77,11 @@ export default function LoginScreen() {
         return;
       }
 
-      // Success - the auth listener in _layout.tsx will automatically redirect to dashboard
+      // Success - log activity and redirect
       console.log('Login successful:', data.user?.email);
+      if (data.user) {
+        await supabase.from('activity_logs').insert({ user_id: data.user.id, activity: 'Logged in' });
+      }
     } catch (e) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
