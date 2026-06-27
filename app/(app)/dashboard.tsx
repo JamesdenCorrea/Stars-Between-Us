@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-    View, Text, StyleSheet, TouchableOpacity, ScrollView,
+    View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl,
     Animated, Dimensions, Switch, Modal, TextInput, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import Head from 'expo-router/head';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
@@ -194,6 +195,7 @@ export default function DashboardScreen() {
     const overlayAnim = useRef(new Animated.Value(0)).current;
     // Add this state after the other useState declarations (around line 170)
     const [showComingSoon, setShowComingSoon] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
     const [selectedFeature, setSelectedFeature] = useState<{ name: string; icon: string; message: string } | null>(null);
 
     // Cute coming soon messages for each feature
@@ -261,6 +263,12 @@ export default function DashboardScreen() {
         }
     };
 
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await fetchRecentActivities();
+        setRefreshing(false);
+    }, [user?.id, profile?.partner_id]);
+
     const fetchRecentActivities = async () => {
         if (!user) return;
 
@@ -326,6 +334,25 @@ export default function DashboardScreen() {
     };
 
     useEffect(() => { if (user) fetchProfile(); }, [user]);
+
+    // Real-time subscription for activity logs
+    useEffect(() => {
+        if (!user) return;
+        
+        const channel = supabase
+            .channel('activity-updates')
+            .on('postgres_changes', 
+                { event: '*', schema: 'public', table: 'activity_logs' },
+                () => {
+                    fetchRecentActivities();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [user?.id, profile?.partner_id]);
 
 
 
@@ -428,6 +455,10 @@ export default function DashboardScreen() {
         : null;
 
     return (
+        <>
+          <Head>
+            <title>Dashboard | Stars Between Us</title>
+          </Head>
         <View style={[s.root, { backgroundColor: theme.surfaceBg }]}>
             <SafeAreaView style={s.container} edges={['top']}>
                 {/* Header */}
@@ -444,7 +475,17 @@ export default function DashboardScreen() {
                     </View>
                 </View>
 
-                <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
+                <ScrollView 
+                    contentContainerStyle={s.scroll} 
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl 
+                            refreshing={refreshing} 
+                            onRefresh={onRefresh}
+                            tintColor={theme.accentColor}
+                            colors={[theme.accentColor]}
+                        />
+                    }>
                     {/* Welcome Card */}
                     <View style={[s.welcomeCard, { backgroundColor: theme.cardBg, borderColor: theme.cardBorder }]}>
                         <View style={[s.cardCornerTL, { backgroundColor: theme.accentColor + '10', borderColor: theme.accentColor + '30' }]}>
@@ -879,6 +920,7 @@ export default function DashboardScreen() {
                 </View>
             </Modal>
         </View>
+        </>
     );
 }
 

@@ -26,7 +26,8 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/icon.png",
+      "title": "Stars Between Us"
     },
     "plugins": [
       "expo-router",

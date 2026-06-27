@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Head from 'expo-router/head';
 import { Colors, Typography, Spacing, Radius } from '@/constants/theme';
 import { Button } from '@/components/ui';
 
@@ -97,64 +98,70 @@ export default function WelcomeScreen() {
   const glowOpacity = glow.interpolate({ inputRange: [0, 1], outputRange: [0.1, 0.5] });
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Background stars */}
-      {STARS.map((s, i) => (
-        <Star key={i} {...s} />
-      ))}
+    <>
+      <Head>
+        <title>Stars Between Us</title>
+        <meta name="description" content="A private universe for two." />
+      </Head>
+      <SafeAreaView style={styles.container}>
+        {/* Background stars */}
+        {STARS.map((s, i) => (
+          <Star key={i} {...s} />
+        ))}
 
-      {/* Red accent line — top */}
-      <View style={styles.redAccentTop} />
+        {/* Red accent line — top */}
+        <View style={styles.redAccentTop} />
 
-      <View style={styles.content}>
-        {/* Logo section */}
-        <Animated.View style={[styles.logoSection, { transform: [{ scale: logoScale }] }]}>
-          {/* Glow halo behind crown */}
-          <Animated.View style={[styles.glowHalo, { opacity: glowOpacity }]} />
+        <View style={styles.content}>
+          {/* Logo section */}
+          <Animated.View style={[styles.logoSection, { transform: [{ scale: logoScale }] }]}>
+            {/* Glow halo behind crown */}
+            <Animated.View style={[styles.glowHalo, { opacity: glowOpacity }]} />
 
-          {/* Crown / KH emblem */}
-          <View style={styles.crownContainer}>
-            <Text style={styles.crownEmoji}>♛</Text>
+            {/* Crown / KH emblem */}
+            <View style={styles.crownContainer}>
+              <Text style={styles.crownEmoji}>♛</Text>
+            </View>
+
+            <Text style={styles.appName}>Stars Between Us</Text>
+            <View style={styles.taglineRow}>
+              <View style={styles.taglineLine} />
+              <Text style={styles.tagline}>our little universe</Text>
+              <View style={styles.taglineLine} />
+            </View>
+          </Animated.View>
+
+          {/* Decorative card */}
+          <View style={styles.card}>
+            <Text style={styles.cardText}>
+              A private space for two people who share{' '}
+              <Text style={styles.cardHighlight}>something worth keeping. </Text>
+              Messages, memories, and moments — just yours.
+            </Text>
           </View>
 
-          <Text style={styles.appName}>Stars Between Us</Text>
-          <View style={styles.taglineRow}>
-            <View style={styles.taglineLine} />
-            <Text style={styles.tagline}>our little universe</Text>
-            <View style={styles.taglineLine} />
+          {/* Actions */}
+          <View style={styles.actions}>
+            <Button
+              label="Begin Our Story"
+              variant="primary"
+              size="lg"
+              onPress={() => router.push('/(auth)/register')}
+              style={styles.primaryBtn}
+            />
+            <Button
+              label="I already have an account"
+              variant="secondary"
+              size="lg"
+              onPress={() => router.push('/(auth)/login')}
+            />
           </View>
-        </Animated.View>
-
-        {/* Decorative card */}
-        <View style={styles.card}>
-          <Text style={styles.cardText}>
-            A private space for two people who share{' '}
-            <Text style={styles.cardHighlight}>something worth keeping. </Text>
-            Messages, memories, and moments — just yours.
-          </Text>
         </View>
 
-        {/* Actions */}
-        <View style={styles.actions}>
-          <Button
-            label="Begin Our Story"
-            variant="primary"
-            size="lg"
-            onPress={() => router.push('/(auth)/register')}
-            style={styles.primaryBtn}
-          />
-          <Button
-            label="I already have an account"
-            variant="secondary"
-            size="lg"
-            onPress={() => router.push('/(auth)/login')}
-          />
-        </View>
-      </View>
-
-      {/* Red accent line — bottom */}
-      <View style={styles.redAccentBottom} />
-    </SafeAreaView>
+        {/* Red accent line — bottom */}
+        <View style={styles.redAccentBottom} />
+      </SafeAreaView>
+    </>
   );
 }
 

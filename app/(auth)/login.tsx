@@ -4,6 +4,7 @@ import {
   Platform, ScrollView, TouchableOpacity, Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import Head from 'expo-router/head';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, Radius } from '@/constants/theme';
@@ -76,7 +77,8 @@ export default function LoginScreen() {
         return;
       }
 
-      // Auth listener in _layout.tsx handles redirect to dashboard
+      // Success - the auth listener in _layout.tsx will automatically redirect to dashboard
+      console.log('Login successful:', data.user?.email);
     } catch (e) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
@@ -98,83 +100,98 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-
-          <TouchableOpacity
-            style={styles.backBtn}
-            onPress={() => router.canGoBack() ? router.back() : router.replace('/(auth)/welcome')}
+    <>
+      <Head>
+        <title>Login | Stars Between Us</title>
+      </Head>
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+          style={styles.keyboardView}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        >
+          <ScrollView 
+            contentContainerStyle={styles.scroll} 
+            keyboardShouldPersistTaps="handled" 
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            overScrollMode="never"
           >
-            <Ionicons name="arrow-back" size={22} color={Colors.textSecondary} />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.backBtn}
+              onPress={() => router.canGoBack() ? router.back() : router.replace('/(auth)/welcome')}
+            >
+              <Ionicons name="arrow-back" size={22} color={Colors.textSecondary} />
+            </TouchableOpacity>
 
-          <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-            <View style={styles.header}>
-              <View style={styles.iconBadge}>
-                <Ionicons name="heart" size={28} color={Colors.red} />
+            <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+              <View style={styles.header}>
+                <View style={styles.iconBadge}>
+                  <Ionicons name="heart" size={28} color={Colors.red} />
+                </View>
+                <Text style={styles.title}>Welcome back</Text>
+                <Text style={styles.subtitle}>Sign in to your shared universe</Text>
               </View>
-              <Text style={styles.title}>Welcome back</Text>
-              <Text style={styles.subtitle}>Sign in to your shared universe</Text>
-            </View>
 
-            <View style={styles.form}>
-              <Input
-                label="Email"
-                placeholder="you@example.com"
-                value={email}
-                onChangeText={(t) => { setEmail(t); setErrors(e => ({ ...e, email: undefined })); }}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                error={errors.email}
-                leftIcon={<Ionicons name="mail-outline" size={18} color={Colors.textMuted} />}
-              />
-              <Input
-                label="Password"
-                placeholder="Your secret key"
-                value={password}
-                onChangeText={(t) => { setPassword(t); setErrors(e => ({ ...e, password: undefined })); }}
-                secureTextEntry={!showPassword}
-                autoComplete="password"
-                error={errors.password}
-                leftIcon={<Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} />}
-                rightIcon={
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={Colors.textMuted} />
-                  </TouchableOpacity>
-                }
-              />
-              <TouchableOpacity style={styles.forgotBtn} onPress={handleForgotPassword}>
-                <Text style={styles.forgotText}>Forgot password?</Text>
-              </TouchableOpacity>
-            </View>
+              <View style={styles.form}>
+                <Input
+                  label="Email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChangeText={(t) => { setEmail(t); setErrors(e => ({ ...e, email: undefined })); }}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  error={errors.email}
+                  leftIcon={<Ionicons name="mail-outline" size={18} color={Colors.textMuted} />}
+                />
+                <Input
+                  label="Password"
+                  placeholder="Your secret key"
+                  value={password}
+                  onChangeText={(t) => { setPassword(t); setErrors(e => ({ ...e, password: undefined })); }}
+                  secureTextEntry={!showPassword}
+                  autoComplete="password"
+                  error={errors.password}
+                  leftIcon={<Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} />}
+                  rightIcon={
+                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                      <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={Colors.textMuted} />
+                    </TouchableOpacity>
+                  }
+                />
+                <TouchableOpacity style={styles.forgotBtn} onPress={handleForgotPassword}>
+                  <Text style={styles.forgotText}>Forgot password?</Text>
+                </TouchableOpacity>
+              </View>
 
-            <Button label="Sign In" variant="primary" size="lg" loading={loading} onPress={handleLogin} style={styles.signInBtn} />
+              <Button label="Sign In" variant="primary" size="lg" loading={loading} onPress={handleLogin} style={styles.signInBtn} />
 
-            <Divider label="or" />
+              <Divider label="or" />
 
-            <View style={styles.registerRow}>
-              <Text style={styles.registerPrompt}>Don't have an account? </Text>
-              <TouchableOpacity onPress={() => router.replace('/(auth)/register')}>
-                <Text style={styles.registerLink}>Create one</Text>
-              </TouchableOpacity>
-            </View>
+              <View style={styles.registerRow}>
+                <Text style={styles.registerPrompt}>Don't have an account? </Text>
+                <TouchableOpacity onPress={() => router.replace('/(auth)/register')}>
+                  <Text style={styles.registerLink}>Create one</Text>
+                </TouchableOpacity>
+              </View>
 
-            <View style={styles.starRow}>
-              {['✦', '✧', '✦', '✧', '✦'].map((s, i) => (
-                <Text key={i} style={[styles.starDeco, { opacity: i === 2 ? 1 : 0.3, fontSize: i === 2 ? 16 : 10 }]}>{s}</Text>
-              ))}
-            </View>
-          </Animated.View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+              <View style={styles.starRow}>
+                {['✦', '✧', '✦', '✧', '✦'].map((s, i) => (
+                  <Text key={i} style={[styles.starDeco, { opacity: i === 2 ? 1 : 0.3, fontSize: i === 2 ? 16 : 10 }]}>{s}</Text>
+                ))}
+              </View>
+            </Animated.View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.black },
+  keyboardView: { flex: 1 },
   scroll: { flexGrow: 1, paddingHorizontal: Spacing.xl, paddingBottom: Spacing['2xl'] },
   backBtn: { marginTop: Spacing.md, marginBottom: Spacing.lg, width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.surface, alignItems: 'center', justifyContent: 'center' },
   content: { flex: 1 },

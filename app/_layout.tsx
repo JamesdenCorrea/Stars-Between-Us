@@ -1,55 +1,53 @@
+import { Stack, router, useSegments } from 'expo-router';
+import { StatusBar, View, ActivityIndicator } from 'react-native';
 import { useEffect, useState } from 'react';
-import { Stack, useRouter, useSegments } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, View } from 'react-native';
-import { supabase } from '@/lib/supabase';
-import { Colors } from '@/constants/theme';
+import { supabase } from '../lib/supabase';
+import { Colors } from '../constants/theme';
+import { Session } from '@supabase/supabase-js';
+import Head from 'expo-router/head';
 
 export default function RootLayout() {
-  const segments = useSegments();
-  const router = useRouter();
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const segments = useSegments();
 
   useEffect(() => {
+    // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      checkAuthState(session);
+      setSession(session);
       setIsLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth event:', event);
-
-      if (event === 'SIGNED_OUT') {
-        console.log('User signed out, redirecting to login');
-        router.replace('/(auth)/login');
-        return;
-      }
-
-      checkAuthState(session);
-      setIsLoading(false);
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed:', _event, session?.user?.email);
+      setSession(session);
     });
 
     return () => subscription.unsubscribe();
-  }, [segments]);
+  }, []);
 
-  const checkAuthState = (session: any) => {
-    const isLoggedIn = !!session;
-    const isInAuthGroup = segments[0] === '(auth)';
-    const isInAppGroup = segments[0] === '(app)';
-    const isConfirmEmail = segments[0] === 'confirm-email';
+  useEffect(() => {
+    if (isLoading) return;
 
-    if (isConfirmEmail) return;
+    const inAuthGroup = segments[0] === '(auth)' || segments[0] === undefined;
+    const inAppGroup = segments[0] === '(app)';
+    
+    console.log('Navigation check:', { 
+      session: !!session, 
+      inAuthGroup, 
+      inAppGroup, 
+      segments: segments.join('/') 
+    });
 
-    console.log('Auth check:', { isLoggedIn, isInAuthGroup, isInAppGroup, segments });
-
-    if (isLoggedIn && !isInAppGroup) {
-      console.log('Redirecting to dashboard');
+    if (!session && !inAuthGroup) {
+      // No session, redirect to login
+      router.replace('/(auth)/welcome');
+    } else if (session && inAuthGroup) {
+      // Has session, redirect to dashboard
       router.replace('/(app)/dashboard');
-    } else if (!isLoggedIn && !isInAuthGroup) {
-      console.log('Redirecting to login');
-      router.replace('/(auth)/login');
     }
-  };
+  }, [session, isLoading, segments]);
 
   if (isLoading) {
     return (
@@ -61,7 +59,12 @@ export default function RootLayout() {
 
   return (
     <>
-      <StatusBar style="light" />
+      <Head>
+        <title>Stars Between Us</title>
+        <meta name="description" content="A private universe for two." />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+      </Head>
+      <StatusBar barStyle="light-content" backgroundColor={Colors.black} />
       <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(app)" />
