@@ -585,7 +585,8 @@ export default function DashboardScreen() {
                     ) : (
                         <View style={s.activityList}>
                             {recentActivities.map((a, i) => {
-                                const isAudit = a.activity?.includes('Updated profile') ||
+                                const isAudit = a.activity?.includes('Logged in') ||
+                                    a.activity?.includes('Updated profile') ||
                                     a.activity?.includes('Enabled') ||
                                     a.activity?.includes('Disabled') ||
                                     a.activity?.includes('Logged out') ||

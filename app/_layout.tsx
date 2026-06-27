@@ -19,9 +19,17 @@ export default function RootLayout() {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log('Auth state changed:', _event, session?.user?.email);
       setSession(session);
+      
+      // Log login activity
+      if (_event === 'SIGNED_IN' && session?.user) {
+        const { error } = await supabase
+          .from('activity_logs')
+          .insert({ user_id: session.user.id, activity: 'Logged in' });
+        if (error) console.log('Failed to log login:', error.message);
+      }
     });
 
     return () => subscription.unsubscribe();
