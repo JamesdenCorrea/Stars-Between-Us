@@ -263,6 +263,17 @@ export default function DashboardScreen() {
         }
     };
 
+    // Auto-clean audit logs older than 7 days
+    const cleanOldAuditLogs = async () => {
+        if (!user) return;
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        await supabase
+            .from('activity_logs')
+            .delete()
+            .lt('created_at', sevenDaysAgo)
+            .or('activity.eq.Logged in,activity.eq.Logged out,activity.like.Updated profile%,activity.like.Enabled%,activity.like.Disabled%,activity.like.Changed theme%,activity.like.Visited happiness jar');
+    };
+
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await fetchRecentActivities();
@@ -361,6 +372,7 @@ export default function DashboardScreen() {
         useCallback(() => {
             // Always fetch recent activities when dashboard comes into focus
             if (user) {
+                cleanOldAuditLogs();
                 fetchRecentActivities();
             }
     }, [user?.id, profile?.partner_id])
